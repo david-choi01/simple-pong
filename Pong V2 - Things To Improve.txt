@@ -1,0 +1,11 @@
+Pong V2 - Things to Improve
+
+Game logic
+1. Fix the bug which occurs when the ball collides with top/botttom side of panel. The current logic only flips the direction of x-component of velocity, so when the ball collides with top/bottom side of panel, the ball gets stuck inside the panel. 
+2. Change the calculation for velocity components -> rather than getting random number for one of the components and calculating the other component, calculate both components from randomly chosen angle
+
+Code:
+1. Remove redundancy in code
+2. Initilase the Paddle object with the associated control
+3. Refactor code to pass position of objects into the declaration of the object 
+
