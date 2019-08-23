@@ -16,20 +16,29 @@ class Paddle(pygame.sprite.Sprite):
     paddle_length = 75
     paddle_buffer = 15
     move_speed = 9
-    player_control = {
-        # Store the inputs players can make and associated direction in dictionary
-        pygame.K_w: -1,
-        pygame.K_s: 1,
-        pygame.K_UP: -1,
-        pygame.K_DOWN: 1
-    }
 
-    def __init__(self):
+    def __init__(self, up_input, down_input, initial_pos):
         pygame.sprite.Sprite.__init__(self)
 
         self.image = pygame.Surface((Paddle.paddle_width, Paddle.paddle_length))
         self.image.fill(WHITE)
         self.rect = self.image.get_rect()
+        self.rect.center = initial_pos  # Position the paddle to given initial position
+
+        # The controls for the paddle
+        self.up_key = up_input
+        self.down_key = down_input
+
+    def update(self):
+        """reads user input and calls the move function"""
+        key = pygame.key.get_pressed()
+
+        if key[self.up_key]:
+            direction = -1
+            self.move(direction)
+        if key[self.down_key]:
+            direction = 1
+            self.move(direction)
 
     def move(self, direction):
         """moves the paddle in the direction of user input"""
@@ -53,12 +62,13 @@ class Ball(pygame.sprite.Sprite):
     surf_dim = ball_radius * 2
     velocity = 10
 
-    def __init__(self):
+    def __init__(self, initial_pos):
         pygame.sprite.Sprite.__init__(self)
 
         self.image = pygame.Surface((Ball.surf_dim, Ball.surf_dim), pygame.SRCALPHA)
         pygame.draw.circle(self.image, WHITE, (Ball.ball_radius, Ball.ball_radius), Ball.ball_radius)
         self.rect = self.image.get_rect()
+        self.rect.center = initial_pos  # Position the ball to given initial position
 
         self.move_x = random.choice([v for v in range(-5, 5) if v not in [0]])  # Choose a random number between -5
         # and 5, while excluding 0
@@ -109,12 +119,13 @@ class Ball(pygame.sprite.Sprite):
 
 
 class Score(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, initial_pos):
         pygame.sprite.Sprite.__init__(self)
         self.font = pygame.font.Font(None, 100)
         self.score = 0
         self.image = self.font.render(str(self.score), 0, WHITE)
         self.rect = self.image.get_rect()
+        self.rect.center = initial_pos  # Position the score to given initial position
 
 
 def main():
@@ -133,21 +144,11 @@ def main():
     # line
 
     # Load in all the sprites
-    player_one = Paddle()
-    player_one.rect.center = (50, (SCREEN_HEIGHT / 2))  # Position the first player paddle
-
-    player_two = Paddle()
-    player_two.rect.center = (590, (SCREEN_HEIGHT / 2))  # Position the second player paddle
-
-    ball = Ball()
-    ball.rect.center = ((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2))  # Position the ball
-
-    score_one = Score()
-    score_one.rect.center = (150, 80)  # Position score for player one
-
-    score_two = Score()
-    score_two.rect.center = (480, 80)  # Position score for player two
-
+    player_one = Paddle(up_input=pygame.K_w, down_input=pygame.K_s, initial_pos=(50, (SCREEN_HEIGHT / 2)))
+    player_two = Paddle(up_input=pygame.K_UP, down_input=pygame.K_DOWN, initial_pos=(590, (SCREEN_HEIGHT / 2)))
+    ball = Ball(initial_pos=((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2)))
+    score_one = Score(initial_pos=(150, 80))
+    score_two = Score((480, 80))
     all_sprites = pygame.sprite.RenderPlain(ball, player_one, player_two, score_one, score_two)
 
     running = 1
@@ -160,14 +161,6 @@ def main():
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = 0
-
-        # Iterate over the dictionary which holds data for player input and associated direction
-        for player_input, direction in Paddle.player_control.items():
-            if key[player_input]:
-                if player_input == pygame.K_w or player_input == pygame.K_s:  # Detect player one input
-                    player_one.move(direction)
-                elif player_input == pygame.K_UP or player_input == pygame.K_DOWN:  # Detect player two input
-                    player_two.move(direction)
 
         player_rects = [player_one.rect, player_two.rect]  # Create list which contains the most up-to-date rect of
         # paddles
